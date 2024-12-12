@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  nodejs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9090:9090"
+    env_file: .env
+    depends_on:
+      - mysqldb
+    networks:
+      - app-network
+    environment:
+      DB_HOST: mysqldb 
+      DB_USERNAME: root
+      DB_PASSWORD: root@123
+      DB_NAME: test_db
+
+  mysqldb:
+    image: mysql:8.0.32
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root@123
+      MYSQL_DATABASE: test_db
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      retries: 5
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+    networks:
+      - app-network
+
+volumes:
+  mysql-data:
+
+networks:
+  app-network:
